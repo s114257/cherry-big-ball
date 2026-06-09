@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小丸子的櫻花粉紅跑酷冒險</title>
+    <style>
+        /* 全域樣式：精緻粉色夢幻風格 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background: linear-gradient(135deg, #fff0f5 0%, #ffe4e1 50%, #ffd1dc 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            color: #d94663;
+        }
+
+        .game-container {
+            text-align: center;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+            color: #d94663;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8);
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #ff6b8b;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        /* 儀表板 */
+        .dashboard {
+            width: 800px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 0 5px;
+        }
+
+        .score-board {
+            font-size: 18px;
+            color: #fff;
+            background: linear-gradient(135deg, #ff6b8b, #ff4757);
+            padding: 6px 20px;
+            border-radius: 50px;
+            box-shadow: 0 4px 10px rgba(255, 107, 139, 0.3);
+            font-weight: bold;
+        }
+
+        .high-score {
+            font-size: 14px;
+            color: #ff6b8b;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid #ffb6c1;
+        }
+
+        /* 遊戲舞台 */
+        #gameStage {
+            width: 800px;
+            height: 320px;
+            background: linear-gradient(to bottom, #fff5f7 0%, #fff0f5 70%, #ffe4e1 100%);
+            border: 6px solid #ffb6c1;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(217, 70, 99, 0.15);
+        }
+
+        /* 背景裝飾：粉紅浮雲 */
+        .cloud {
+            position: absolute;
+            background: #ffffff;
+            border-radius: 100px;
+            opacity: 0.6;
+        }
+        .cloud::before, .cloud::after {
+            content: '';
+            position: absolute;
+            background: #ffffff;
+            border-radius: 50%;
+        }
+        .cloud-1 { width: 80px; height: 30px; top: 40px; left: 150px; animation: floatLeft 25s linear infinite; }
+        .cloud-2 { width: 120px; height: 40px; top: 70px; left: 500px; animation: floatLeft 18s linear infinite; opacity: 0.4; }
+        
+        @keyframes floatLeft {
+            from { transform: translateX(850px); }
+            to { transform: translateX(-150px); }
+        }
+
+        /* 地平線與草地底座 */
+        .floor {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 35px;
+            background: linear-gradient(to bottom, #ff9ebb 0%, #ff85a7 100%);
+            border-top: 3px solid #ff6b8b;
+        }
+
+        /* 櫻桃小丸子造型 (純 CSS 精緻繪製版) */
+        #maruko {
+            width: 50px;
+            height: 65px;
+            position: absolute;
+            bottom: 35px;
+            left: 70px;
+            transition: bottom 0.02s linear;
+            z-index: 10;
+        }
+
+        /* 經典黃色學生帽 */
+        .maruko-hat {
+            width: 44px;
+            height: 16px;
+            background-color: #fbc531;
+            border-radius: 20px 20px 0 0;
+            margin: 0 auto;
+            position: relative;
+            box-shadow: inset 0 -2px 0 rgba(0,0,0,0.1);
+        }
+        .maruko-hat::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: -4px;
+            width: 52px;
+            height: 4px;
+            background-color: #fbc531;
+            border-radius: 3px;
+        }
+
+        /* 頭部與招牌鋸齒短髮 */
+        .maruko-head {
+            width: 40px;
+            height: 32px;
+            background-color: #ffeaa7; /* 膚色 */
+            border-radius: 50% 50% 40% 40%;
+            margin: -2px auto 0;
+            position: relative;
+            overflow: visible;
+        }
+        /* 鋸齒瀏海效果 */
+        .maruko-hair {
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            width: 44px;
+            height: 15px;
+            background-color: #2d3436; /* 黑色頭髮 */
+            border-radius: 10px 10px 0 0;
+            clip-path: polygon(0% 0%, 100% 0%, 100% 70%, 90% 100%, 80% 70%, 70% 100%, 60% 70%, 50% 100%, 40% 70%, 30% 100%, 20% 70%, 10% 100%, 0% 70%);
+        }
+        /* 五官 */
+        .maruko-face {
+            position: absolute;
+            top: 14px;
+            width: 100%;
+            height: 15px;
+        }
+        .maruko-eye {
+            width: 4px;
+            height: 4px;
+            background-color: #2d3436;
+            border-radius: 50%;
+            position: absolute;
+        }
+        .maruko-eye.left { left: 10px; }
+        .maruko-eye.right { right: 10px; }
+        .maruko-blush {
+            width: 6px;
+            height: 4px;
+            background-color: #ff7675;
+            border-radius: 50%;
+            position: absolute;
+            top: 4px;
+        }
+        .maruko-blush.left { left: 4px; }
+        .maruko-blush.right { right: 4px; }
+        .maruko-mouth {
+            width: 6px;
+            height: 4px;
+            border-bottom: 2px solid #2d3436;
+            border-radius: 0 0 4px 4px;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 2px;
+        }
+
+        /* 經典紅色吊帶裙與白襯衫 */
+        .maruko-body {
+            width: 34px;
+            height: 20px;
+            background-color: #ff4757; /* 紅裙 */
+            margin: -2px auto 0;
+            border-radius: 4px 4px 12px 12px;
+            position: relative;
+            box-shadow: inset 0 5px 0 #ffffff; /* 白襯衫領口 */
+        }
+        /* 黃色雙肩包 */
+        .maruko-bag {
+            position: absolute;
+            right: -3px;
+            top: 2px;
+            width: 8px;
+            height: 12px;
+            background-color: #fbc531;
+            border-radius: 3px;
+            border-left: 1px solid #e1b12c;
+        }
+
+        /* 跑步動畫 */
+        .running .maruko-body {
+            animation: bounce 0.15s infinite alternate;
+        }
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-2px); }
+        }
+
+        /* 跳躍姿勢 */
+        .jumping .maruko-body {
+            transform: scaleY(0.95) translateY(-1px);
+        }
+
+        /* 障礙物造型 */
+        .obstacle {
+            position: absolute;
+            bottom: 35px;
+            z-index: 5;
+            border-radius: 8px;
+        }
+
+        /* 種類 1：討厭的考試卷 (0分) */
+        .obs-paper {
+            width: 30px;
+            height: 40px;
+            background-color: #fff;
+            border: 2px solid #dda0dd;
+            border-radius: 4px;
+            box-shadow: 3px 3px 0px #dda0dd;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 10px;
+            font-weight: bold;
+            color: #ff4757;
+        }
+        .obs-paper::before {
+            content: '0';
+            font-size: 16px;
+            color: #ff4757;
+        }
+
+        /* 種類 2：紫色小仙人掌 */
+        .obs-cactus {
+            width: 24px;
+            height: 48px;
+            background-color: #dda0dd;
+            border-radius: 12px 12px 0 0;
+            position: relative;
+        }
+        .obs-cactus::before, .obs-cactus::after {
+            content: '';
+            position: absolute;
+            background-color: #dda0dd;
+            width: 10px;
+            height: 18px;
+            border-radius: 10px;
+        }
+        .obs-cactus::before {
+            left: -8px;
+            top: 10px;
+            border-radius: 10px 0 0 10px;
+            border-top: 3px solid transparent;
+        }
+        .obs-cactus::after {
+            right: -8px;
+            top: 16px;
+            border-radius: 0 10px 10px 0;
+            border-top: 3px solid transparent;
+        }
+
+        /* 覆蓋層視窗 */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 240, 245, 0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+        }
+
+        .overlay h2 {
+            font-size: 38px;
+            color: #d94663;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 0px #fff;
+            letter-spacing: 1px;
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #ff6b8b, #ff4757);
+            color: white;
+            border: none;
+            padding: 12px 35px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 107, 139, 0.4);
+            transition: transform 0.1s, box-shadow 0.2s;
+        }
+
+        .btn-start:hover {
+            transform: scale(1.05);
+            box-shadow: 0 7px 20px rgba(255, 107, 139, 0.6);
+        }
+
+        .btn-start:active {
+            transform: scale(0.98);
+        }
+
+        .instructions {
+            margin-top: 15px;
+            font-size: 13px;
+            color: #888;
+            line-height: 1.6;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* 櫻花瓣飄落動畫 */
+        .petal {
+            position: absolute;
+            background-color: #ffb6c1;
+            border-radius: 150% 0 150% 40%;
+            opacity: 0.7;
+            z-index: 1;
+            animation: fadePetal 4s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes fadePetal {
+            0% {
+                transform: translate(0, -10px) rotate(0deg);
+                opacity: 0;
+            }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% {
+                transform: translate(-200px, 330px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <h1>🌸 小丸子的粉紅跑酷冒險 🌸</h1>
+        <div class="subtitle">櫻花系經典斷線小恐龍改版網頁遊戲</div>
+
+        <div class="dashboard">
+            <div class="high-score">最高紀錄: <span id="highScore">0</span></div>
+            <div class="score-board">SCORE: <span id="score">0</span></div>
+        </div>
+
+        <div id="gameStage">
+            <div class="cloud cloud-1"></div>
+            <div class="cloud cloud-2"></div>
+            
+            <div class="floor"></div>
+            
+            <div id="maruko" class="running">
+                <div class="maruko-hat"></div>
+                <div class="maruko-head">
+                    <div class="maruko-hair"></div>
+                    <div class="maruko-face">
+                        <div class="maruko-eye left"></div>
+                        <div class="maruko-eye right"></div>
+                        <div class="maruko-blush left"></div>
+                        <div class="maruko-blush right"></div>
+                        <div class="maruko-mouth"></div>
+                    </div>
+                </div>
+                <div class="maruko-body">
+                    <div class="maruko-bag"></div>
+                </div>
+            </div>
+
+            <div id="menuOverlay" class="overlay">
+                <h2 id="overlayTitle">小丸子大冒險</h2>
+                <button id="btnStart" class="btn-start">開始遊戲</button>
+                <div class="instructions">
+                    操作說明：按下 <strong>「空白鍵」</strong> 或 <strong>「點擊遊戲畫面」</strong> 讓小丸子跳躍。<br>
+                    躲避迎面而來的考試卷與紫色仙人掌，挑戰最高分吧！
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const maruko = document.getElementById('maruko');
+        const gameStage = document.getElementById('gameStage');
+        const scoreDisplay = document.getElementById('score');
+        const highScoreDisplay = document.getElementById('highScore');
+        const menuOverlay = document.getElementById('menuOverlay');
+        const overlayTitle = document.getElementById('overlayTitle');
+        const btnStart = document.getElementById('btnStart');
+
+        // 遊戲狀態變數
+        let isJumping = false;
+        let isGameOver = true;
+        let score = 0;
+        let highScore = localStorage.getItem('maruko_high_score') || 0;
+        
+        let position = 35; 
+        let gravity = 0.6;
+        let velocity = 0;
+        
+        let obstacleSpeed = 6;
+        let obstacleSpawnTimer = null;
+        let activeObstacles = [];
+        let scoreInterval = null;
+        let animationFrameId = null;
+
+        highScoreDisplay.innerText = highScore;
+
+        // 監聽鍵盤與點擊事件
+        document.addEventListener('keydown', function(e) {
+            if (e.code === 'Space') {
+                e.preventDefault(); 
+                handleAction();
+            }
+        });
+
+        gameStage.addEventListener('mousedown', function(e) {
+            if(e.target !== btnStart) {
+                handleAction();
+            }
+        });
+
+        function handleAction() {
+            if (isGameOver) {
+                if (menuOverlay.classList.contains('hidden') === false) {
+                    startGame();
+                }
+            } else {
+                jump();
+            }
+        }
+
+        btnStart.addEventListener('click', function(e) {
+            e.stopPropagation(); 
+            startGame();
+        });
+
+        function jump() {
+            if (isJumping) return;
+            isJumping = true;
+            velocity = 13; 
+            maruko.classList.remove('running');
+            maruko.classList.add('jumping');
+        }
+
+        // 物理運動與碰撞主循環
+        function updateGame() {
+            if (isGameOver) return;
+
+            // 1. 小丸子跳躍物理運算
+            if (isJumping) {
+                position += velocity;
+                velocity -= gravity;
+                
+                if (position <= 35) {
+                    position = 35;
+                    isJumping = false;
+                    velocity = 0;
+                    maruko.classList.remove('jumping');
+                    maruko.classList.add('running');
+                }
+                maruko.style.bottom = position + 'px';
+            }
+
+            // 2. 障礙物移動與碰撞偵測
+            for (let i = activeObstacles.length - 1; i >= 0; i--) {
+                let obsObj = activeObstacles[i];
+                obsObj.left -= obstacleSpeed;
+                obsObj.element.style.left = obsObj.left + 'px';
+
+                if (obsObj.left < -50) {
+                    obsObj.element.remove();
+                    activeObstacles.splice(i, 1);
+                    continue;
+                }
+
+                // 精確碰撞偵測框
+                let marukoLeft = 70;
+                let marukoRight = 120;
+                let marukoBottom = position;
+                let marukoTop = position + 65;
+
+                let obsLeft = obsObj.left;
+                let obsRight = obsObj.left + obsObj.width;
+                let obsBottom = 35;
+                let obsTop = 35 + obsObj.height;
+
+                if (
+                    marukoRight - 8 > obsLeft && 
+                    marukoLeft + 8 < obsRight && 
+                    marukoBottom < obsTop && 
+                    marukoTop > obsBottom
+                ) {
+                    endGame();
+                    return;
+                }
+            }
+
+            // 3. 生成櫻花瓣特效
+            if (Math.random() < 0.03) {
+                createPetal();
+            }
+
+            animationFrameId = requestAnimationFrame(updateGame);
+        }
+
+        function startGame() {
+            isGameOver = false;
+            score = 0;
+            obstacleSpeed = 6;
+            position = 35;
+            isJumping = false;
+            velocity = 0;
+            
+            scoreDisplay.innerText = score;
+            menuOverlay.classList.add('hidden');
+            maruko.style.bottom = '35px';
+            maruko.classList.add('running');
+            maruko.classList.remove('jumping');
+
+            activeObstacles.forEach(obs => obs.element.remove());
+            activeObstacles = [];
+
+            scoreInterval = setInterval(() => {
+                score++;
+                scoreDisplay.innerText = score;
+                if (score % 100 === 0 && obstacleSpeed < 15) {
+                    obstacleSpeed += 0.8;
+                }
+            }, 100);
+
+            scheduleNextObstacle();
+            animationFrameId = requestAnimationFrame(updateGame);
+        }
+
+        function scheduleNextObstacle() {
+            if (isGameOver) return;
+            
+            let minTime = 1200 - (obstacleSpeed * 40); 
+            let randomDelay = Math.random() * 1000 + Math.max(600, minTime);
+            
+            obstacleSpawnTimer = setTimeout(() => {
+                if (!isGameOver) {
+                    spawnObstacle();
+                    scheduleNextObstacle();
+                }
+            }, randomDelay);
+        }
+
+        function spawnObstacle() {
+            const obsEl = document.createElement('div');
+            obsEl.classList.add('obstacle');
+
+            const type = Math.random() > 0.5 ? 1 : 2;
+            let width = 30;
+            let height = 40;
+
+            if (type === 1) {
+                obsEl.innerHTML = '<div class="obs-paper"></div>';
+                width = 32;
+                height = 42;
+            } else {
+                obsEl.innerHTML = '<div class="obs-cactus"></div>';
+                width = 24;
+                height = 48;
+            }
+
+            obsEl.style.left = '850px';
+            gameStage.appendChild(obsEl);
+
+            activeObstacles.push({
+                element: obsEl,
+                left: 850,
+                width: width,
+                height: height
+            });
+        }
+
+        function createPetal() {
+            const petal = document.createElement('div');
+            petal.classList.add('petal');
+            
+            let size = Math.random() * 8 + 6;
+            petal.style.width = size + 'px';
+            petal.style.height = (size * 1.2) + 'px';
+            petal.style.left = (Math.random() * 400 + 400) + 'px'; 
+            petal.style.top = (Math.random() * 80 - 20) + 'px';
+            
+            gameStage.appendChild(petal);
+            
+            setTimeout(() => {
+                petal.remove();
+            }, 4000);
+        }
+
+        function endGame() {
+            isGameOver = true;
+            cancelAnimationFrame(animationFrameId);
+            clearInterval(scoreInterval);
+            clearTimeout(obstacleSpawnTimer);
+
+            maruko.classList.remove('running');
+
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('maruko_high_score', highScore);
+                highScoreDisplay.innerText = highScore;
+            }
+
+            overlayTitle.innerText = "GAME OVER";
+            btnStart.innerText = "再試一次";
+            menuOverlay.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
